@@ -1,0 +1,45 @@
+name: AccuKnox ZAP DAST Scan
+description: Run a full ZAP scan and upload the reports to the AccuKnox CSPM panel.
+inputs:
+  target_url:
+    description: "The URL of the web application to scan."
+    required: true
+  accuknox_token:
+    description: "Token for authenticating with the AccuKnox CSPM panel."
+    required: true
+  accuknox_endpoint:
+    description: "The URL of the AccuKnox CSPM panel to push the scan results to."
+    required: true
+  tenant_id:
+    description: "The ID of the tenant associated with the CSPM dashboard."
+    required: true
+  label:
+    description: "Label created in AccuKnox SaaS for associating the scan results."
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: ZAP Full Scan
+      run: |
+        docker run --rm \
+          -v $PWD:/zap/wrk \
+          -t zaproxy/zap-stable zap-full-scan.py \
+          -t ${{ inputs.target_url }} \
+          -J /zap/wrk/zap-report.json \
+          -I
+      shell: bash
+
+    - name: Upload ZAP Report to AccuKnox CSPM Panel
+      run: |
+        response=$(curl --location --request POST "https://${{ inputs.accuknox_endpoint }}/api/v1/artifact/?tenant_id=${{ inputs.tenant_id }}&data_type=ZAP&label_id=${{ inputs.label }}&save_to_s3=false" \
+          --header "Tenant-Id: ${{ inputs.tenant_id }}" \
+          --header "Authorization: Bearer ${{ inputs.accuknox_token }}" \
+          --form "file=@zap-report.json")
+
+        echo "Response: $response"
+        if [[ "$response" != *"File received successfully"* ]]; then
+          echo "Error: Failed to push report to CSPM panel"
+          exit 1
+        fi
+      shell: bash
