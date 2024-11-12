@@ -1,4 +1,5 @@
 
+
 # AccuKnox DAST Scan GitHub Action
 
 ## Learn More
@@ -6,17 +7,30 @@
 - [About Accuknox](https://www.accuknox.com/)
 
 **Description**  
-This GitHub Action performs a Dynamic Application Security Testing (DAST) scan using OWASP ZAP, and then uploads the scan results to the AccuKnox CSPM panel. This action can be configured with specific inputs to seamlessly integrate with your DevSecOps pipeline.
+
+This GitHub Action performs a Dynamic Application Security Testing (DAST) scan using OWASP ZAP and uploads the scan results to the AccuKnox CSPM panel. This action can be configured with specific inputs to integrate seamlessly into your DevSecOps pipeline.
+
+## Inputs
+
+| Input               | Description                                                                                                  | Required  | Default       |
+|---------------------|--------------------------------------------------------------------------------------------------------------|-----------|---------------|
+| `target_url`        | The URL of the web application to scan.                                                                      | Yes       |               |
+| `accuknox_token`    | Token for authenticating with the AccuKnox CSPM panel.                                                       | Yes       |               |
+| `accuknox_endpoint` | The URL of the AccuKnox CSPM panel where scan results will be uploaded.                                      | Yes       |               |
+| `tenant_id`         | The ID of the tenant associated with the AccuKnox CSPM dashboard.                                            | Yes       |               |
+| `label`             | Label created in AccuKnox SaaS to associate the scan results.                                                | Yes       |               |
+| `severity_threshold`| Minimum severity level (e.g., High, Medium, Low, Informational) that will cause the pipeline to fail.       | Yes       |               |
+| `scan_type`         | Type of ZAP scan to run: `baseline` or `full-scan`.                                                          | Yes       | `full-scan`   |
 
 ## Usage
 
-### Steps for Using AccuKnox DAST Scan Action in a Workflow YAML File
+### Steps for Using the AccuKnox DAST Scan Action in a Workflow
 
-1. **Checkout into the Repo**  
-   Use the checkout action to ensure your codebase is available for scanning.
-   
+1. **Checkout the Repo**  
+   Use the `actions/checkout` action to ensure the codebase is available for scanning.
+
 2. **Add AccuKnox DAST Scan Action**  
-   Use the `accuknox/dast-scan-action` repository with the desired version tag, e.g., `v1.0.0`.
+   Reference the `accuknox/dast-scan-action` repository with the desired version tag, e.g., `v1.0.0`.
 
 3. **Token Generation from AccuKnox SaaS and Viewing Tenant ID**  
    To obtain the `accuknox_token` and `tenant_id` values needed to authenticate with AccuKnox:
@@ -60,25 +74,28 @@ jobs:
           tenant_id: ${{ secrets.TENANT_ID }}
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
           label: "my-dast-scan"
+          severity_threshold: "High"
+          scan_type: "baseline"
 ```
 
-## Input Values
+### Secrets Setup
 
-| Input Value        | Description                                                | Optional/Required | Default Value |
-|--------------------|------------------------------------------------------------|--------------------|---------------|
-| `target_url`       | URL of the web application to be scanned.                  | Required          | None          |
-| `accuknox_endpoint`| AccuKnox API endpoint URL to upload the scan results.      | Required          | None          |
-| `tenant_id`        | Unique ID of the tenant for AccuKnox CSPM panel.           | Required          | None          |
-| `accuknox_token`   | Token for authenticating with AccuKnox API.                | Required          | None          |
-| `label`            | Label in AccuKnox SaaS for tagging scan results.           | Required          | None          |
+Add the following secrets in your GitHub repository under **Settings > Secrets**:
 
-## How it Works
+- `ACCUKNOX_ENDPOINT`: Your AccuKnox CSPM endpoint.
+- `TENANT_ID`: Your AccuKnox tenant ID.
+- `ACCUKNOX_TOKEN`: Your AccuKnox API token.
 
-- **OWASP ZAP DAST Scan**: The action runs a DAST scan on the specified target URL, using OWASP ZAP to identify security vulnerabilities in the application.
-- **AccuKnox Report Generation**: The action generates a report in JSON format.
-- **Report Upload**: The generated report is uploaded to the AccuKnox CSPM panel for centralized monitoring and insights.
+## How It Works
+
+1. **OWASP ZAP DAST Scan**: The action initiates a DAST scan on the specified `target_url` using OWASP ZAP.
+2. **AccuKnox Report Generation**: Generates a report in JSON format.
+3. **Report Upload**: The report is uploaded to the AccuKnox CSPM panel for centralized monitoring and insights.
+4. **Severity Check**: The action checks for vulnerabilities that meet or exceed the specified `severity_threshold`. If any are found, the workflow fails.
 
 ## Notes
 
-- Ensure all necessary secrets (`ACCUKNOX_ENDPOINT`, `TENANT_ID`, and `ACCUKNOX_TOKEN`) are securely stored in your repository's settings.
-- AccuKnox panel provides a centralized view of all DAST results.
+- Ensure secrets are configured correctly in your GitHub repository.
+- The AccuKnox panel provides a centralized view of all DAST results.
+
+For more information, visit the [AccuKnox website](https://www.accuknox.com/).
