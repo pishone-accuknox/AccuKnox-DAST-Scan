@@ -88,3 +88,8 @@ runs:
           echo "No vulnerabilities with severity ${{ inputs.severity_threshold }} or higher were found."
         fi
       shell: bash
+
+
+branding:
+  icon: "shield"
+  color: "red"
