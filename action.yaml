@@ -71,11 +71,12 @@ runs:
     - name: Check Severity Level in ZAP Report
       run: |
         # Map severity threshold to risk code (0=Informational, 1=Low, 2=Medium, 3=High)
-        case "${{ inputs.severity_threshold }}" in
-          High)           RISK_CODE=3 ;;
-          Medium)         RISK_CODE=2 ;;
-          Low)            RISK_CODE=1 ;;
-          Informational)  RISK_CODE=0 ;;
+        SEVERITY_THRESHOLD="$(echo "${{ inputs.severity_threshold }}" | tr '[:upper:]' '[:lower:]')"
+        case "$SEVERITY_THRESHOLD" in
+          high)           RISK_CODE=3 ;;
+          medium)         RISK_CODE=2 ;;
+          low)            RISK_CODE=1 ;;
+          informational)  RISK_CODE=0 ;;
           *)              echo "Invalid severity threshold"; exit 1 ;;
         esac
 
